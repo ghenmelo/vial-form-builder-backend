@@ -5,3 +5,10 @@ export const Uuid = (options: Omit<StringOptions, 'format'> = {}) =>
     format: 'uuid',
     ...options,
   })
+
+export function StringValidJson(options: Omit<StringOptions, 'format'> = {}) {
+  return Type.String({
+    format: 'valid-json',
+    ...options,
+  })
+}

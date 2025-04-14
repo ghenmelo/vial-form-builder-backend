@@ -1,16 +1,11 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
-
-type VialSuccessResponse = {
-  statusCode: number
-  message: string
-  data: any
-}
+import { IVialSuccessResponse } from 'routes/schemas/common'
 
 const preSerializer = async (
   request: FastifyRequest,
   reply: FastifyReply,
   payload: any
-): Promise<VialSuccessResponse> => {
+): Promise<IVialSuccessResponse> => {
   // Ensure every response (not errors) have the {statusCode, data, message} format
 
   return {

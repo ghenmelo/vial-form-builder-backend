@@ -4,9 +4,11 @@ const errorHandler = (error: any, req: any, reply: any) => {
   if (error.statusCode) {
     reply.code(error.statusCode)
   }
+
   if (error instanceof PrismaClientKnownRequestError) {
     reply.code(StatusCodes.notFound)
   }
+  
   reply.send(error)
   return
 }
