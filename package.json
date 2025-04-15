@@ -37,7 +37,8 @@
     "seed": "docker exec -it vial-backend-b-api npx prisma db seed",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/src/index.js"
   },
   "keywords": [],
   "author": "",
