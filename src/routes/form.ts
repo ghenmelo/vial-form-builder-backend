@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 
-import { Form } from '@prisma/client'
+import { Form, SourceRecord } from '@prisma/client'
 
 import prisma from '../db/db_client'
 import { serializer } from './middleware/pre_serializer'
@@ -44,6 +44,44 @@ async function formRoutes(app: FastifyInstance) {
       } catch (err: any) {
         log.error({ err }, err.message)
         throw new ApiError('Failed to fetch form', 400)
+      }
+    },
+  })
+
+  app.get<{
+    Params: IEntityId
+    Reply: SourceRecord[]
+  }>('/source/:id', {
+    schema: {
+      description: 'Get',
+      tags: ['form'],
+      params: EntityId,
+      response: {
+        200: FormSchema,
+        400: ApiErrorResponse,
+      },
+    },
+    async handler(req, reply) {
+      const { params } = req
+      const { id } = params
+
+      try {
+        console.log(id)
+        const form = await prisma.form.findUniqueOrThrow({ where: { id } })
+
+        const sourceRecord = await prisma.sourceRecord.findMany({
+          where: {
+            formId: form.id,
+          },
+          include: {
+            sourceData: true,
+          },
+        })
+
+        return sourceRecord
+      } catch (err: any) {
+        log.error({ err }, err.message)
+        throw new ApiError('Failed to sources from form', 400)
       }
     },
   })

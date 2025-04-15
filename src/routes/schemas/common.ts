@@ -39,7 +39,7 @@ export const CreateSourceDataDTO = Type.Object({
 
 export const CreateSourceRecordDTO = Type.Object({
   formId: Uuid(),
-  answers: Type.Array(CreateSourceDataDTO, {
+  sourceData: Type.Array(CreateSourceDataDTO, {
     minItems: 1,
   }),
 })
@@ -48,7 +48,7 @@ export type ICreateSourceRecordDTO = Static<typeof CreateSourceRecordDTO>
 
 export const SourceDataSchema = Type.Object({
   id: Uuid(),
-  answer: Type.String(),
+  sourceData: Type.String(),
   fieldId: Uuid(),
 })
 

@@ -12,7 +12,7 @@
     "fastify": "^5.2.2"
   },
   "name": "backend",
-  "description": "## Introduction The purpose of this project is to simulate the back-end development work at Vial. It implements the main stack we use for our APIs.",
+  "description": "## Introduction The purpose of this project is to simulate the back-  d development work at Vial. It implements the main stack we use for our APIs.",
   "version": "1.0.0",
   "main": "index.js",
   "directories": {
@@ -36,7 +36,8 @@
     "migrate": "docker exec -it vial-backend-b-api npx prisma migrate deploy",
     "seed": "docker exec -it vial-backend-b-api npx prisma db seed",
     "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix"
+    "lint:fix": "eslint src --ext .ts --fix",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

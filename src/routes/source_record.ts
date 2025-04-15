@@ -9,6 +9,7 @@ import {
   ApiErrorResponse,
   CreateSourceRecordDTO,
   ICreateSourceRecordDTO,
+  IEntityId,
   SourceRecordSchema,
   VialSuccessResponse,
 } from './schemas/common'
@@ -79,7 +80,7 @@ async function sourceRecordRoutes(app: FastifyInstance) {
             },
           })
 
-          const sourceDatas = body.answers.map(({ answer, question }) => ({
+          const sourceDatas = body.sourceData.map(({ answer, question }) => ({
             answer,
             question,
             sourceRecordId: sourceRecord.id,
