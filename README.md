@@ -68,3 +68,17 @@ The backend is deployed using [Render](https://render.com).
 
 - All schemas are defined using TypeBox and validated using AJV.
 - Error handling follows a consistent structure using a custom `ApiError` class.
+
+## 🚀 Running Locally
+
+To run the backend locally, follow these steps:
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/seu-usuario/vial-form-builder-backend.git
+
+docker compose build
+docker compose up
+npm run migrate
+npm run seed
