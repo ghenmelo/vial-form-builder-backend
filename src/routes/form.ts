@@ -123,6 +123,16 @@ async function formRoutes(app: FastifyInstance) {
     async handler(req, reply) {
       const { name, fields } = req.body
 
+      const existingForm = await prisma.form.findFirst({
+        where: {
+          name: name,
+        },
+      })
+
+      if (existingForm) {
+        throw new ApiError('A form with this name already exists.', 409)
+      }
+
       const form = await prisma.form
         .create({
           data: {
