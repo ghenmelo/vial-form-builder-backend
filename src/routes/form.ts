@@ -26,7 +26,7 @@ async function formRoutes(app: FastifyInstance) {
     Reply: Form
   }>('/:id', {
     schema: {
-      description: 'Search for form',
+      description: 'Route responsible for fetching a form by its ID.',
       tags: ['form'],
       params: EntityId,
       response: {
@@ -53,7 +53,8 @@ async function formRoutes(app: FastifyInstance) {
     Reply: SourceRecord[]
   }>('/source/:id', {
     schema: {
-      description: 'Get',
+      description:
+        'Route responsible for returning the source records of a form, based on the form ID.',
       tags: ['form'],
       params: EntityId,
       response: {
@@ -66,7 +67,6 @@ async function formRoutes(app: FastifyInstance) {
       const { id } = params
 
       try {
-        console.log(id)
         const form = await prisma.form.findUniqueOrThrow({ where: { id } })
 
         const sourceRecord = await prisma.sourceRecord.findMany({
@@ -90,7 +90,7 @@ async function formRoutes(app: FastifyInstance) {
     Reply: Form[]
   }>('/', {
     schema: {
-      description: 'Get all forms',
+      description: 'Route responsible for fetching all forms.',
       tags: ['form'],
       response: {
         200: Type.Array(FormSchema),
@@ -112,7 +112,7 @@ async function formRoutes(app: FastifyInstance) {
     Body: ICreateFormDTO
   }>('/', {
     schema: {
-      description: 'Insert new form',
+      description: 'Route responsible for saving a new form.',
       tags: ['form'],
       body: CreateFormDTO,
       response: {
@@ -144,7 +144,7 @@ async function formRoutes(app: FastifyInstance) {
     Params: IEntityId
   }>('/:id', {
     schema: {
-      description: 'Delete form',
+      description: 'Route responsible for deleting a form.',
       tags: ['form'],
       params: EntityId,
       response: {

@@ -20,7 +20,7 @@ export const ApiErrorResponse = Type.Object({
 export type IApiErrorResponse = Static<typeof ApiErrorResponse>
 
 export const EntityId = Type.Object({
-  id: Uuid(),
+  id: Type.String(),
 })
 
 export type IEntityId = Static<typeof EntityId>
@@ -66,6 +66,7 @@ export const FormSchema = Type.Object({
   id: Uuid(),
   name: Type.String(),
   fields: Type.Array(StringValidJson()),
+  sourceRecord: Type.Array(SourceRecordSchema),
 })
 
 export type IFormSchema = Static<typeof FormSchema>

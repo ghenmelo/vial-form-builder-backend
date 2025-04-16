@@ -24,6 +24,7 @@ async function sourceRecordRoutes(app: FastifyInstance) {
     Reply: SourceRecord[]
   }>('/', {
     schema: {
+      description: 'Route responsible for fetching all source records.',
       tags: ['source-record'],
       response: {
         200: Type.Array(SourceRecordSchema),
@@ -50,6 +51,7 @@ async function sourceRecordRoutes(app: FastifyInstance) {
     Body: ICreateSourceRecordDTO
   }>('/', {
     schema: {
+      description: 'Route responsible for saving a new source record.',
       tags: ['source-record'],
       body: CreateSourceRecordDTO,
       response: {
