@@ -123,7 +123,6 @@ async function formRoutes(app: FastifyInstance) {
     async handler(req, reply) {
       const { name, fields } = req.body
 
-      console.log(fields)
       const form = await prisma.form
         .create({
           data: {
