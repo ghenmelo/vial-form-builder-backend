@@ -55,6 +55,14 @@ To guarantee the consistency and reliability of data operations, **Prisma transa
 
 ---
 
+## 🧪 Testing
+
+Some unit tests have been implemented to validate core logic and transactional behavior, especially in services related to form creation and deletion.
+
+> ⚠️ Note: Not the entire application is covered. Further test coverage is planned for future development stages.
+
+---
+
 ## 🚀 Deployment
 
 The backend is deployed using [Render](https://render.com).
@@ -62,12 +70,16 @@ The backend is deployed using [Render](https://render.com).
 🔗 **Live API**: [https://vial-form-builder-backend-3.onrender.com](https://vial-form-builder-backend-3.onrender.com)  
 📄 **Swagger Documentation**: [https://vial-form-builder-backend-3.onrender.com/api](https://vial-form-builder-backend-3.onrender.com/api)
 
+> ⚠️ **Note:** The server may take a few seconds to respond after the first request. This happens because Render uses a free-tier deployment that goes into sleep mode when not in use.
+
 ---
 
 ## 📌 Notes
 
 - All schemas are defined using TypeBox and validated using AJV.
 - Error handling follows a consistent structure using a custom `ApiError` class.
+
+---
 
 ## 🚀 Running Locally
 
