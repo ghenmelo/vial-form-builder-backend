@@ -1,8 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
-import { SourceRecord } from '@prisma/client'
+import { Prisma, SourceRecord } from '@prisma/client'
 
-import prisma from '../db/db_client'
 import { serializer } from './middleware/pre_serializer'
 import { ApiError } from '../errors'
 import {
@@ -14,11 +13,16 @@ import {
   VialSuccessResponse,
 } from './schemas/common'
 import { Type } from '@fastify/type-provider-typebox'
+import { FormService } from '../service/form.service'
+import { SourceRecordService } from '../service/source_record.service'
 
 async function sourceRecordRoutes(app: FastifyInstance) {
   app.setReplySerializer(serializer)
 
   const log = app.log.child({ component: 'sourceRecordRoutes' })
+
+  const formService = new FormService()
+  const sourceRecordService = new SourceRecordService()
 
   app.get<{
     Reply: SourceRecord[]
@@ -33,11 +37,7 @@ async function sourceRecordRoutes(app: FastifyInstance) {
     },
     async handler(_, reply) {
       try {
-        const sourceRecord = await prisma.sourceRecord.findMany({
-          include: {
-            sourceData: true,
-          },
-        })
+        const sourceRecord = await sourceRecordService.findAll()
 
         reply.send(sourceRecord)
       } catch (err: any) {
@@ -63,41 +63,21 @@ async function sourceRecordRoutes(app: FastifyInstance) {
     async handler(req, reply) {
       const body = req.body
 
-      const form = await prisma.form
-        .findFirstOrThrow({
-          where: {
-            id: body.formId,
-          },
-        })
-        .catch(err => {
+      try {
+        await formService.findByIdOrThrow(body.formId)
+        await sourceRecordService.createSourceRecord(body)
+        reply.status(201)
+      } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
           log.error({ err }, err.message)
-          throw new ApiError('Form not found', 404)
-        })
 
-      await prisma
-        .$transaction(async transaction => {
-          const sourceRecord = await transaction.sourceRecord.create({
-            data: {
-              formId: form.id,
-            },
-          })
+          if (err.code === 'P2025') {
+            throw new ApiError('Source record not found.', 404)
+          }
 
-          const sourceDatas = body.sourceData.map(({ answer, question }) => ({
-            answer,
-            question,
-            sourceRecordId: sourceRecord.id,
-          }))
-
-          await transaction.sourceData.createMany({
-            data: sourceDatas,
-          })
-        })
-        .catch(err => {
-          log.error({ err }, err.message)
           throw new ApiError('Unexpected error while saving data.', 500)
-        })
-
-      reply.status(201)
+        }
+      }
     },
   })
 }

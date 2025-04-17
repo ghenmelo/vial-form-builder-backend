@@ -1,8 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
-import { Form, SourceRecord } from '@prisma/client'
+import { Form, Prisma, SourceRecord } from '@prisma/client'
 
-import prisma from '../db/db_client'
 import { serializer } from './middleware/pre_serializer'
 import {
   ApiErrorResponse,
@@ -15,11 +14,14 @@ import {
 } from './schemas/common'
 import { ApiError } from '../errors'
 import { Type } from '@sinclair/typebox'
+import { FormService } from '../service/form.service'
 
 async function formRoutes(app: FastifyInstance) {
   app.setReplySerializer(serializer)
 
   const log = app.log.child({ component: 'formRoutes' })
+
+  const service = new FormService()
 
   app.get<{
     Params: IEntityId
@@ -39,7 +41,7 @@ async function formRoutes(app: FastifyInstance) {
       const { id } = params
 
       try {
-        const form = await prisma.form.findUniqueOrThrow({ where: { id } })
+        const form = await service.findByIdOrThrow(id)
         reply.send(form)
       } catch (err: any) {
         log.error({ err }, err.message)
@@ -67,18 +69,8 @@ async function formRoutes(app: FastifyInstance) {
       const { id } = params
 
       try {
-        const form = await prisma.form.findUniqueOrThrow({ where: { id } })
-
-        const sourceRecord = await prisma.sourceRecord.findMany({
-          where: {
-            formId: form.id,
-          },
-          include: {
-            sourceData: true,
-          },
-        })
-
-        return sourceRecord
+        const sourceRecords = await service.findFormSourceRecordById(id)
+        reply.send(sourceRecords)
       } catch (err: any) {
         log.error({ err }, err.message)
         throw new ApiError('Failed to sources from form', 400)
@@ -99,7 +91,7 @@ async function formRoutes(app: FastifyInstance) {
     },
     async handler(_, reply) {
       try {
-        const form = await prisma.form.findMany()
+        const form = await service.findAll()
         reply.send(form)
       } catch (err: any) {
         log.error({ err }, err.message)
@@ -121,31 +113,20 @@ async function formRoutes(app: FastifyInstance) {
       },
     },
     async handler(req, reply) {
-      const { name, fields } = req.body
-
-      const existingForm = await prisma.form.findFirst({
-        where: {
-          name: name,
-        },
-      })
+      const { name } = req.body
+      const existingForm = await service.findByName(name)
 
       if (existingForm) {
         throw new ApiError('A form with this name already exists.', 409)
       }
 
-      const form = await prisma.form
-        .create({
-          data: {
-            name: name,
-            fields: JSON.parse(fields),
-          },
-        })
-        .catch(err => {
-          log.error({ err }, err.message)
-          throw new ApiError('Failed to save form', 400)
-        })
-
-      reply.send(form)
+      try {
+        const form = await service.createForm(req.body)
+        reply.send(form)
+      } catch (err) {
+        log.error({ err }, err.message)
+        throw new ApiError('Failed to save form', 400)
+      }
     },
   })
 
@@ -166,43 +147,20 @@ async function formRoutes(app: FastifyInstance) {
       const { params } = req
       const { id } = params
 
-      const form = await prisma.form
-        .findFirstOrThrow({
-          where: {
-            id: id,
-          },
-        })
-        .catch(err => {
-          log.error({ err }, err.message)
-          throw new ApiError('Form not found', 404)
-        })
-
       try {
-        await prisma.$transaction(async transaction => {
-          await transaction.sourceData.deleteMany({
-            where: {
-              sourceRecord: {
-                formId: form.id,
-              },
-            },
-          })
-
-          await transaction.sourceRecord.deleteMany({
-            where: {
-              formId: form.id,
-            },
-          })
-
-          await transaction.form.delete({
-            where: {
-              id: form.id,
-            },
-          })
-        })
+        await service.findByIdOrThrow(id)
+        await service.deleteForm(id)
         reply.status(204)
       } catch (err) {
-        log.error({ err }, err.message)
-        throw new ApiError('Unexpected error while deleting data.', 500)
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+          log.error({ err }, err.message)
+
+          if (err.code === 'P2025') {
+            throw new ApiError('Form not found.', 404)
+          }
+
+          throw new ApiError('Unexpected error while deleting data.', 500)
+        }
       }
     },
   })
